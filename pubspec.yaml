@@ -1,12 +1,11 @@
 name: typedstorage
 description: Typed store data based on a local file support saving data encrypted.
-version: 0.0.6
-author: Alexander.Li
+version: 0.0.7
 homepage: https://github.com/ipconfiger/typedstorage
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
-  flutter: ">=1.17.0"
+  sdk: ">=2.12.0 <4.0.0"
+  flutter: ">=2.0.0"
 
 dependencies:
   flutter:
@@ -15,7 +14,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  coidentity: ^0.1.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

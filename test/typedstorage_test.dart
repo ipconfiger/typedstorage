@@ -3,35 +3,35 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:typedstorage/src/storage.dart';
-import 'package:coidentity/coidentity.dart';
 
 
-class Process implements ICryptable {
-  CoreIdentity identity;
-  Future init() async {
-    identity = CoreIdentity();
-    identity.setup(EncryptMethod.SECP256K1, null);
-  }
+class MockCryptor implements ICryptable {
   static final Uint8List SECRET = Uint8List.fromList([0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,1,2]);
   static final Uint8List IV = Uint8List.fromList([1,2,3,4,5,6,7,8]);
+  
   @override
-  Future<Uint8List> process(Uint8List value) async{
-    return await identity.processFile(value, SECRET, IV);
+  Future<Uint8List> process(Uint8List value) async {
+    // Simple XOR encryption for testing purposes
+    final result = Uint8List(value.length);
+    for (int i = 0; i < value.length; i++) {
+      result[i] = value[i] ^ SECRET[i % SECRET.length];
+    }
+    return result;
   }
 }
 
 class AType implements ISerializable{
-  String name;
-  int age;
+  String? name;
+  int? age;
 
   @override
-  void deSerialize(Map value) {
-    name = value['name'];
-    age = value['age'];
+  void deSerialize(Map<String, dynamic> value) {
+    name = value['name'] as String?;
+    age = value['age'] as int?;
   }
 
   @override
-  Map serialize() {
+  Map<String, dynamic> serialize() {
     return {'name': name, 'age': age};
   }
 
@@ -51,8 +51,7 @@ void main() {
       File(file_path).deleteSync();
     }
 
-    final encProcess = new Process();
-    await encProcess.init();
+    final encProcess = MockCryptor();
     final store = TypeStorage().init(file_path, cryptor: encProcess);
     await store.reload();
 
@@ -77,7 +76,7 @@ void main() {
       store.addToList<AType>(ps);
     }
 
-    for (final pp in store.findType<AType>(where:(item) => item.name.startsWith("A"), sort:(a, b) => a.name.length.compareTo(b.name.length), creator:() => AType())){
+    for (final pp in store.findType<AType>(where:(item) => item.name!.startsWith("A"), sort:(a, b) => a.name!.length.compareTo(b.name!.length), creator:() => AType())){
       print(pp);
     }
 
@@ -95,9 +94,9 @@ void main() {
     }
 
     final first = store.namedListFirst<AType>(namedKey);
-    expect(first.name, names[0]);
+    expect(first!.name, names[0]);
 
-    final ls = store.namedListQuery<AType>(namedKey, where: (item) => item.name.startsWith('A'), sort: (a, b)=> a.age.compareTo(b.age));
+    final ls = store.namedListQuery<AType>(namedKey, where: (item) => item.name!.startsWith('A'), sort: (a, b)=> a.age!.compareTo(b.age!));
     print('$ls');
 
 
